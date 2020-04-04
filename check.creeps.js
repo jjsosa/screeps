@@ -19,14 +19,14 @@ module.exports = {
     },
     //Checks number of havesters creeps
     upgraders(creeps){
-        let harv = _.sum(creeps, (c) => c.memory.role == 'harvester');
-        console.log('Upgraders: '+ harv);
-        return harv;
+        let upg = _.sum(creeps, (c) => c.memory.role == 'upgrader');
+        console.log('Upgraders: '+ upg);
+        return upg;
     },
     //Checks number of havesters creeps
     builders(creeps){
-        let harv = _.sum(creeps, (c) => c.memory.role == 'builder');
-        console.log('Builders: '+ harv);
-        return harv;
+        let bui = _.sum(creeps, (c) => c.memory.role == 'builder');
+        console.log('Builders: '+ bui);
+        return bui;
     }
 }
