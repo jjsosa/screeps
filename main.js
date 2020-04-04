@@ -1,5 +1,6 @@
 var roleHarvester = require('role.harvester');
 var roleUpgrader = require('role.upgrader');
+var roleBuilder = require('role.builder');
 var checkCreeps = require('check.creeps');
 
 module.exports.loop = function () {
@@ -12,6 +13,7 @@ module.exports.loop = function () {
     checkCreeps.free(allCreeps);
     checkCreeps.harvesters(allCreeps);
     checkCreeps.upgraders(allCreeps);
+    checkCreeps.builders(allCreeps);
     
     // check for memory entries of died creeps by iterating over Memory.creeps
     for (let name in Memory.creeps) {
@@ -35,32 +37,41 @@ module.exports.loop = function () {
         else if (creep.memory.role == 'upgrader') {
             roleUpgrader.run(creep);
         }
+        // if creep is builder, call builder script
+        else if (creep.memory.role == 'builder') {
+            roleBuilder.run(creep);
+        }
     }
 
-    // goal: have 10 harvesters and as many upgraders as possible
-    var minimumNumberOfHarvesters = 5;
+    // 10 harvesters, 5 builders and as many upgraders as possible
+    const minNumOfHarvesters = 10;
+    const minNumOfBuilders = 5;
     // _.sum will count the number of properties in Game.creeps filtered by the
     //  arrow function, which checks for the creep being a harvester
-    var numberOfHarvesters = _.sum(Game.creeps, (c) => c.memory.role == 'harvester');
-    var name = undefined;
+    const numOfHarvesters = _.sum(Game.creeps, (c) => c.memory.role == 'harvester');
+    const numOfBuilders = _.sum(Game.creeps, (c) => c.memory.role == 'builder');
+    var creep = undefined;
 
     // if not enough harvesters
-    if (numberOfHarvesters < minimumNumberOfHarvesters) {
-        // try to spawn one
-        name = Game.spawns.Spawn1.createCreep([WORK,WORK,CARRY,MOVE], undefined,
+    if (numOfHarvesters < minNumOfHarvesters) {
+        // try to spawn a harvester
+        creep = Game.spawns.Spawn1.createCreep([WORK,WORK,CARRY,MOVE], undefined,
             { role: 'harvester', working: false});
     }
+    // if not enough builders
+    if (numOfBuilders < minNumOfBuilders) {
+        // try to spawn builder
+        creep = Game.spawns.Spawn1.createCreep([WORK,WORK,CARRY,MOVE], undefined,
+            { role: 'builder', working: false});
+    }
+    // if enough harvester and builders, then try to spawn an upgrader
     else {
-        // else try to spawn an upgrader
-        // small change from what you saw in the video: for upgraders it makes
-        //  more sense to have two move parts because they have to travel further
-        name = Game.spawns.Spawn1.createCreep([WORK,CARRY,MOVE,MOVE], undefined,
+        creep = Game.spawns.Spawn1.createCreep([WORK,CARRY,MOVE,MOVE], undefined,
             { role: 'upgrader', working: false});
     }
 
     // print name to console if spawning was a success
-    // name > 0 would not work since string > 0 returns false
-    if (!(name < 0)) {
-        console.log("Spawned new creep: " + name);
+    if (creep) {
+        console.log("Spawned new creep: " + creep);
     }
 }
