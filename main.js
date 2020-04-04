@@ -8,12 +8,12 @@ module.exports.loop = function () {
     console.log('[TICK:+'+Game.time+']');
 
     //Check creeps
-    let allCreeps = Game.creeps;
+    var allCreeps = Game.creeps;
     checkCreeps.alive(allCreeps);
     checkCreeps.free(allCreeps);
-    checkCreeps.harvesters(allCreeps);
-    checkCreeps.upgraders(allCreeps);
-    checkCreeps.builders(allCreeps);
+    const numOfHarvesters = checkCreeps.harvesters(allCreeps);
+    const numOfUpgraders = checkCreeps.upgraders(allCreeps);
+    const numOfBuilders = checkCreeps.builders(allCreeps);
     
     // check for memory entries of died creeps by iterating over Memory.creeps
     for (let name in Memory.creeps) {
@@ -46,32 +46,31 @@ module.exports.loop = function () {
     // 10 harvesters, 5 builders and as many upgraders as possible
     const minNumOfHarvesters = 10;
     const minNumOfBuilders = 5;
-    // _.sum will count the number of properties in Game.creeps filtered by the
-    //  arrow function, which checks for the creep being a harvester
-    const numOfHarvesters = _.sum(Game.creeps, (c) => c.memory.role == 'harvester');
-    const numOfBuilders = _.sum(Game.creeps, (c) => c.memory.role == 'builder');
     var creep = undefined;
 
     // if not enough harvesters
-    if (numOfHarvesters < minNumOfHarvesters) {
+    if(numOfHarvesters < minNumOfHarvesters){
         // try to spawn a harvester
         creep = Game.spawns.Spawn1.createCreep([WORK,WORK,CARRY,MOVE], undefined,
             { role: 'harvester', working: false});
     }
     // if not enough builders
-    if (numOfBuilders < minNumOfBuilders) {
+    if(numOfBuilders < minNumOfBuilders){
         // try to spawn builder
         creep = Game.spawns.Spawn1.createCreep([WORK,WORK,CARRY,MOVE], undefined,
             { role: 'builder', working: false});
     }
     // if enough harvester and builders, then try to spawn an upgrader
-    else {
+    else{
         creep = Game.spawns.Spawn1.createCreep([WORK,CARRY,MOVE,MOVE], undefined,
             { role: 'upgrader', working: false});
     }
 
     // print name to console if spawning was a success
-    if (creep) {
+    if(!(creep < 0)) {
         console.log("Spawned new creep: " + creep);
+    }else{
+        console.log("No creep spawned");
+        console.log(creep);
     }
 }
