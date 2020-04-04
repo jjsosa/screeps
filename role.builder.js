@@ -22,13 +22,17 @@ module.exports = {
         }
         // if creep is supposed to harvest energy from source
         else {
-            // find closest source
-            var source = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
-            // try to harvest energy, if the source is not in range
-            if (creep.build(source) == ERR_NOT_IN_RANGE) {
-                // move towards the source
-                creep.moveTo(source);
-            }
+            this.buildNearest(creep);
+        }
+    },
+    // Build nearest construction site owned
+    buildNearest(creep) {
+        // find closest source
+        var source = creep.pos.findClosestByPath(FIND_MY_CONSTRUCTION_SITES);
+        // try to harvest energy, if the source is not in range
+        if (creep.build(source) == ERR_NOT_IN_RANGE) {
+            // move towards the source
+            creep.moveTo(source);
         }
     }
 };
