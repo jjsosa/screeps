@@ -2,10 +2,13 @@ var roleHarvester = require('role.harvester');
 var roleUpgrader = require('role.upgrader');
 var roleBuilder = require('role.builder');
 var checkCreeps = require('check.creeps');
+var checkMemory = require('check.memory');
 
 module.exports.loop = function () {
     //THIS TICK
     console.log('[TICK:+'+Game.time+']');
+
+    checkMemory.cleanMemory();
 
     //Check creeps
     var allCreeps = Game.creeps;
@@ -14,15 +17,6 @@ module.exports.loop = function () {
     const numOfHarvesters = checkCreeps.harvesters(allCreeps);
     const numOfUpgraders = checkCreeps.upgraders(allCreeps);
     const numOfBuilders = checkCreeps.builders(allCreeps);
-    
-    // check for memory entries of died creeps by iterating over Memory.creeps
-    for (let name in Memory.creeps) {
-        // and checking if the creep is still alive
-        if (Game.creeps[name] == undefined) {
-            // if not, delete the memory entry
-            delete Memory.creeps[name];
-        }
-    }
 
     // for every creep name in Game.creeps
     for (let name in Game.creeps) {
