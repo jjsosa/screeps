@@ -14,12 +14,12 @@ module.exports.loop = function () {
     var allCreeps = Game.creeps;
     checkCreeps.alive(allCreeps);
     checkCreeps.free(allCreeps);
-    const numOfHarvesters = checkCreeps.harvesters(allCreeps);
-    const numOfUpgraders = checkCreeps.upgraders(allCreeps);
-    const numOfBuilders = checkCreeps.builders(allCreeps);
+
+    // Generate new creeps
+    checkCreeps.generateCreeps(allCreeps);
 
     // for every creep name in Game.creeps
-    for (let name in Game.creeps) {
+    for (let name in allCreeps) {
         // get the creep object
         var creep = Game.creeps[name];
 
@@ -35,36 +35,5 @@ module.exports.loop = function () {
         else if (creep.memory.role == 'builder') {
             roleBuilder.run(creep);
         }
-    }
-
-    // 10 harvesters, 5 builders and as many upgraders as possible
-    const minNumOfHarvesters = 10;
-    const minNumOfBuilders = 5;
-    var creep = undefined;
-
-    // if not enough harvesters
-    if(numOfHarvesters < minNumOfHarvesters){
-        // try to spawn a harvester
-        creep = Game.spawns.Spawn1.createCreep([WORK,WORK,CARRY,MOVE], undefined,
-            { role: 'harvester', working: false});
-    }
-    // if not enough builders
-    if(numOfBuilders < minNumOfBuilders){
-        // try to spawn builder
-        creep = Game.spawns.Spawn1.createCreep([WORK,WORK,CARRY,MOVE], undefined,
-            { role: 'builder', working: false});
-    }
-    // if enough harvester and builders, then try to spawn an upgrader
-    else{
-        creep = Game.spawns.Spawn1.createCreep([WORK,CARRY,MOVE,MOVE], undefined,
-            { role: 'upgrader', working: false});
-    }
-
-    // print name to console if spawning was a success
-    if(!(creep < 0)) {
-        console.log("Spawned new creep: " + creep);
-    }else{
-        console.log("No creep spawned");
-        console.log(creep);
     }
 }
