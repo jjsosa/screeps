@@ -5,68 +5,71 @@ module.exports = {
         console.log('Creeps alive: '+ alive);
         return alive;
     },
-    //Checks free creeps
-    free(creeps) {
-        let free = _.sum(creeps, (c) => !c.memory.role);
-        console.log('Creeps not working: '+ free);
-        return free;
-    },
     //Checks number of havesters creeps
     harvesters(creeps){
-        let harv = _.sum(creeps, (c) => c.memory.role == 'harvester');
+        let harv = _.sum(creeps, (c) => c.memory.role == 'Harvester' || c.memory.role == 'harvester');
         console.log('Harvesters: '+ harv);
         return harv;
     },
-    //Checks number of havesters creeps
+    //Checks number of upgraders creeps
     upgraders(creeps){
-        let upg = _.sum(creeps, (c) => c.memory.role == 'upgrader');
+        let upg = _.sum(creeps, (c) => c.memory.role == 'Upgrader' || c.memory.role == 'upgrader');
         console.log('Upgraders: '+ upg);
         return upg;
     },
-    //Checks number of havesters creeps
+    //Checks number of builders creeps
     builders(creeps){
-        let bui = _.sum(creeps, (c) => c.memory.role == 'builder');
+        let bui = _.sum(creeps, (c) => c.memory.role == 'Builder' || c.memory.role == 'builder');
         console.log('Builders: '+ bui);
         return bui;
     },
-    generateCreeps(creeps) {
+    generateCreeps(room) {
+        let creeps = Game.creeps;
         const minNumOfHarvesters = 10;
         const minNumOfBuilders = 5;
         const minNumOfUpgraders = 10;
-        let newCreeps = [];
-
         const numOfHarvesters = this.harvesters(creeps);
         const numOfUpgraders = this.upgraders(creeps);
         const numOfBuilders = this.builders(creeps);
+        const numAlive = this.alive(creeps);
 
-        // if not enough harvesters
-        if(numOfHarvesters < minNumOfHarvesters){
-            // try to spawn a harvester
-            newCreeps.push(Game.spawns.Spawn1.createCreep([WORK,WORK,CARRY,MOVE], 'Harvester' + Game.time.toString(),
-                { role: 'harvester', working: true}));
-        }
-        // if enough harvester and builders, then try to spawn an upgrader
-        if(numOfUpgraders < minNumOfUpgraders){
-            newCreeps.push(Game.spawns.Spawn1.createCreep([WORK,CARRY,MOVE], 'Upgrader' + Game.time.toString(),
-                { role: 'upgrader', working: true}));
-        }
-        // if not enough builders
-        if(numOfBuilders < minNumOfBuilders){
-            // try to spawn builder
-            newCreeps.push(Game.spawns.Spawn1.createCreep([WORK,CARRY,MOVE], 'Builder' + Game.time.toString(),
-                { role: 'builder', working: true}));
-        }
-
-        // print name to console if spawning was a success
-        if(newCreeps.length > 0) {
-            for(let creep in newCreeps){
-                if(!(creep < 0)) {
-                    console.log("Spawned new creep " + creep);
-                }else{
-                    console.log("No creep spawned on this tick");
-                    console.log(creep);
-                }
+            // Check if enough energy to spawn creeps
+            var energyStructures = _.filter(room.find(FIND_STRUCTURES), (structure) => structure.structureType == STRUCTURE_SPAWN || structure.structureType == STRUCTURE_EXTENSION);
+            var totalEnergy = 0;
+            for(var i in energyStructures){
+                totalEnergy = totalEnergy + energyStructures[i].energy;
+                console.log('TOTAL ENERGY: '+totalEnergy)
             }
+
+            // if not enough harvesters
+            if(numOfHarvesters < minNumOfHarvesters && totalEnergy >= 200){
+                // try to spawn a harvester
+                this.spawn('Harvester');
+                totalEnergy -= 200;
+            }
+
+            // if enough harvester, then try to spawn an upgrader
+            if(numOfUpgraders < minNumOfUpgraders && totalEnergy >= 200){
+                this.spawn('Upgrader');
+                totalEnergy -= 200;
+            }
+
+            // if not enough builders
+            if(numOfBuilders < minNumOfBuilders && totalEnergy >= 200){
+                // try to spawn builder
+                this.spawn('Builder');
+                totalEnergy -= 200;
+            }
+    },
+    spawn(role){
+        if(Game.spawns.Spawn1.createCreep(
+            [WORK,CARRY,MOVE],
+            role + Game.time.toString(),
+            {
+                role: role
+            }
+        ) != 0) {
+            console.log("Spawned new: " + role);
         }
     }
 }
