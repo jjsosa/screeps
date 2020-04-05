@@ -1,33 +1,35 @@
 module.exports = {
     // a function to run the logic for this role
-    run: function(creep) {
-        // if creep is bringing energy to the spawn but has no energy left
-        if (creep.memory.working == true && creep.carry.energy == 0) {
-            // switch state
-            creep.memory.working = false;
-        }
-        // if creep is harvesting energy but is full
-        else if (creep.memory.working == false && creep.carry.energy == creep.carryCapacity) {
-            // switch state
-            creep.memory.working = true;
+    harvest(creep){
+        // Check if energy source selected
+        if(!creep.memory.source){
+            // find closest energy source
+            var source = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
+            creep.memory.source = source.id;
+        }else{
+            var source = Game.getObjectById(creep.memory.source);
         }
 
-        // if creep is supposed to transfer energy to the spawn
-        if (creep.memory.working == true) {
-            // try to transfer energy, if the spawn is not in range
-            if (creep.transfer(Game.spawns.Spawn1, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                // move towards the spawn
-                creep.moveTo(Game.spawns.Spawn1);
-            }
-        }
-        // if creep is supposed to harvest energy from source
-        else {
-            // find closest source
-            var source = creep.pos.findClosestByPath(FIND_SOURCES_ACTIVE);
-            // try to harvest energy, if the source is not in range
-            if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+        if(creep.carry.energy < creep.carryCapacity){
+            // try to harvest energy or move if the source is not at range
+            if (creep.harvest(source) != 0) {
                 // move towards the source
                 creep.moveTo(source);
+            }
+        }else{
+            // Check if energy structure selected
+            if(!creep.memory.structure){
+                // find closest energy structure
+                var struct = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, (structure) => structure.structureType == STRUCTURE_SPAWN || structure.structureType == STRUCTURE_EXTENSION);
+                creep.memory.structure = struct.id;
+            } else {
+                var struct = Game.getObjectById(creep.memory.structure);
+            }
+
+            // try to transfer energy, if the spawn is not in range
+            if (creep.transfer(struct, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                // move towards the spawn
+                creep.moveTo(struct);
             }
         }
     }
